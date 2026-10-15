@@ -41,9 +41,17 @@
       margin-bottom: 16px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     }
+    button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--banana); outline-offset: 2px; }
 
     /* Chart */
-    svg { width: 100%; height: auto; display: block; }
+    #hover {
+      display: block;
+      min-height: 1.5em;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+    #hover b { color: var(--banana); font-weight: 600; }
+    svg { width: 100%; height: auto; display: block; touch-action: none; }
     .axis { stroke: #3a3e4a; stroke-width: 1; }
     .zero { stroke: #5a5f6e; stroke-width: 1; stroke-dasharray: 4 4; }
     .grid { stroke: var(--line); stroke-width: 1; }
@@ -60,7 +68,6 @@
     .brand-dot { fill: var(--banana); stroke: #111; stroke-width: 2; filter: drop-shadow(0 0 8px rgba(255, 225, 53, 0.5)); transition: cx 0.25s ease, cy 0.25s ease; }
     .brand-dot.off { fill: none; stroke: var(--banana); stroke-width: 2.5; stroke-dasharray: 3 3; }
     .brand-halo { fill: none; stroke: var(--banana); stroke-width: 1; opacity: 0.4; transition: cx 0.25s ease, cy 0.25s ease; }
-    .dot-label { fill: var(--text); font-size: 12px; font-weight: 600; transition: x 0.25s ease, y 0.25s ease; }
     .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; color: var(--muted); font-size: 0.85rem; }
     .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
     .sw-grow { background: rgba(255, 225, 53, 0.35); }
@@ -70,12 +77,17 @@
     #offnote { color: var(--muted); font-size: 0.85rem; min-height: 1.4em; margin-top: 8px; }
 
     /* Controls */
-    .control { display: block; margin-bottom: 16px; }
+    .control { display: block; margin-bottom: 8px; }
     .control-head { display: flex; justify-content: space-between; align-items: baseline; color: var(--muted); font-size: 0.92rem; margin-bottom: 6px; }
     .control-head output { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; font-size: 1rem; }
     input[type="range"] { width: 100%; accent-color: var(--banana); margin: 0; }
-    input:focus-visible { outline: 2px solid var(--banana); outline-offset: 2px; }
-    .hint { color: var(--muted); font-size: 0.85rem; margin: -8px 0 0; }
+    .hint { color: var(--muted); font-size: 0.85rem; margin: 6px 0 0; }
+
+    details.explain { margin: 0 0 16px; color: var(--muted); font-size: 0.88rem; }
+    details.explain summary { cursor: pointer; color: var(--banana); list-style: none; display: inline-block; }
+    details.explain summary::-webkit-details-marker { display: none; }
+    details.explain summary::before { content: "ⓘ "; }
+    details.explain p { margin: 6px 0 0; padding: 10px 12px; background: var(--panel-2); border-radius: 8px; }
 
     /* Readouts */
     .plain {
@@ -96,6 +108,27 @@
     .stat-value.shrink { color: var(--shrink-text); }
     .stat-help { color: var(--muted); font-size: 0.78rem; line-height: 1.4; }
 
+    /* Learn section */
+    details.learn { border-top: 1px solid var(--line); padding: 12px 0; }
+    details.learn:first-of-type { border-top: 0; padding-top: 0; }
+    details.learn summary { cursor: pointer; font-weight: 600; color: var(--text); }
+    details.learn summary:hover { color: var(--banana); }
+    details.learn .body { color: var(--muted); font-size: 0.95rem; margin-top: 10px; }
+    details.learn .body p { margin: 0 0 10px; }
+    .formula {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .glossary dt { color: var(--banana); font-weight: 600; margin-top: 8px; }
+    .glossary dd { margin: 2px 0 0 0; }
+
     /* Caveats */
     .caveats p { color: var(--muted); font-size: 0.95rem; margin: 0 0 10px; }
     .caveats p:last-child { margin-bottom: 0; }
@@ -114,6 +147,7 @@
     <p class="subtitle">Excess share of voice: how much more you spend than your market share suggests, and what that does to share over a year.</p>
 
     <section class="panel">
+      <span id="hover">Hover over the chart to read the prediction at any ESOV.</span>
       <svg id="chart" role="img" aria-label="Predicted annual share change against excess share of voice"></svg>
       <div class="legend">
         <span><i class="sw sw-grow"></i>Grow: ESOV above the maintain band</span>
@@ -129,11 +163,19 @@
         <span class="control-head">Current market share (SOM) <output id="som-out"></output></span>
         <input type="range" id="som" min="1" max="60" step="0.5">
       </label>
+      <details class="explain">
+        <summary>What is market share?</summary>
+        <p>Your share of the category's sales (or volume). If your brand sells 20 of every 100 units bought in the category, your market share is 20%. This is the "SOM" on the slider.</p>
+      </details>
 
       <label class="control">
-        <span class="control-head">Share of voice (SOV), share of category media spend <output id="sov-out"></output></span>
+        <span class="control-head">Share of voice (SOV) <output id="sov-out"></output></span>
         <input type="range" id="sov" min="0" max="80" step="0.5">
       </label>
+      <details class="explain">
+        <summary>What is share of voice?</summary>
+        <p>Your share of the category's media spend. If the category spends 100 on advertising and your brand spends 25 of it, your SOV is 25%. This is spend, not reach or impressions, and it is measured against the category, not the whole market.</p>
+      </details>
       <p class="hint">Both sliders are percentages. The gap between them is your ESOV, in percentage points (pp).</p>
     </section>
 
@@ -162,6 +204,58 @@
           <div class="stat-help" id="grow1-help">ESOV of 20pp, since 20 × 0.05 = 1.</div>
         </div>
       </div>
+    </section>
+
+    <section class="panel">
+      <h2>Learn how it works</h2>
+
+      <details class="learn">
+        <summary>Percentage points vs percentages</summary>
+        <div class="body">
+          <p>When you subtract one percentage from another, the result is in <b>percentage points (pp)</b>, not percent. If your share of voice goes from 25% to 30%, it has risen by 5pp, but the rise is 20% relative to where it started.</p>
+          <p>ESOV is a difference, so it is always in pp. Your ESOV of +5pp means your SOV is five points higher than your market share.</p>
+        </div>
+      </details>
+
+      <details class="learn">
+        <summary>The rule, in words</summary>
+        <div class="body">
+          <p>The idea is simple. A brand that spends more than its share of the category's media tends to gain share, and a brand that spends less tends to lose it.</p>
+          <div class="formula">ESOV = SOV − SOM
+Predicted share change per year = 0.05 × ESOV</div>
+          <p>The 0.05 comes from the finding that 10pp of ESOV drives about 0.5pp of share growth per year. Divide 0.5 by 10 and you get 0.05, which is the slope of the line on the chart.</p>
+          <p>The line goes through the origin, so an ESOV of zero predicts no change. Every extra point of ESOV adds 0.05pp of growth per year.</p>
+        </div>
+      </details>
+
+      <details class="learn">
+        <summary>How to read the chart</summary>
+        <div class="body">
+          <p>The horizontal axis is your ESOV. The vertical axis is the share change the rule predicts for that ESOV. Your brand is the dot, and it sits on the line.</p>
+          <p>The background colors mark three zones. <b>Maintain</b> is the grey band within ±2pp of zero, where share should stay roughly flat. <b>Grow</b> is to the right, where share should rise. <b>Shrink</b> is to the left, where it should fall.</p>
+          <p>The ±2pp band is a choice made for this tool. The rule itself doesn't draw a line between maintain and grow.</p>
+        </div>
+      </details>
+
+      <details class="learn">
+        <summary>The math, with your current numbers</summary>
+        <div class="body" id="worked"></div>
+      </details>
+
+      <details class="learn">
+        <summary>Glossary</summary>
+        <div class="body">
+          <dl class="glossary">
+            <dt>SOM (share of market)</dt><dd>Your share of category sales or volume.</dd>
+            <dt>SOV (share of voice)</dt><dd>Your share of category media spend.</dd>
+            <dt>ESOV (excess share of voice)</dt><dd>SOV minus SOM, in percentage points. Positive means you spend more than your share.</dd>
+            <dt>pp (percentage points)</dt><dd>The unit for a difference between two percentages. 30% − 25% = 5pp.</dd>
+            <dt>Predicted share change</dt><dd>The rule's estimate of how much your share moves in a year, ESOV × 0.05.</dd>
+            <dt>Regression line through the origin</dt><dd>The straight line of predicted change. It passes through (0, 0), so no excess spend means no predicted change.</dd>
+            <dt>Maintain band</dt><dd>The ±2pp zone around zero, used here to decide when share should hold steady.</dd>
+          </dl>
+        </div>
+      </details>
     </section>
 
     <section class="panel caveats">
@@ -218,6 +312,9 @@
     const py = (y) => M.top + ((Y_MAX - y) / (Y_MAX - Y_MIN)) * PH;
     const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
+    // Inverse of px: a drawing x coordinate back to ESOV.
+    const xToEsov = (vx) => X_MIN + ((vx - M.left) / PW) * (X_MAX - X_MIN);
+
     function drawChart(svgEl, e) {
       svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
       const parts = [];
@@ -271,10 +368,33 @@
       return off;
     }
 
-    // ---- controls and readouts ----
+    // ---- text helpers ----
     const $ = (id) => document.getElementById(id);
     const sign = (v) => (v > 0 ? '+' : '') + v.toFixed(1);
+    // Predicted changes are small (0.05 per pp), so show two decimals.
+    const sign2 = (v) => (v > 0 ? '+' : '') + v.toFixed(2);
 
+    const zoneText = {
+      grow: 'above the maintain band, so share is growing',
+      maintain: `within ±${MAINTAIN_BAND}pp of zero, so share should hold roughly steady`,
+      shrink: 'below the maintain band, so share is likely to fall',
+    };
+
+    // Worked example for the current SOM and SOV.
+    function renderWorked(som, sov) {
+      const e = esov(sov, som);
+      const change = predictedChange(e);
+      const g = sovToGrow(som, 1);
+      return `
+        <p><b>Step 1.</b> ESOV = SOV − SOM = ${sov.toFixed(1)}% − ${som.toFixed(1)}% = <b>${sign(e)}pp</b></p>
+        <p><b>Step 2.</b> Predicted change = 0.05 × ESOV = 0.05 × ${sign(e)} = <b>${sign2(change)}pp per year</b></p>
+        <p><b>Step 3.</b> ${sign(e)}pp is ${zoneText[zoneOf(e)]}.</p>
+        <p><b>Step 4.</b> To grow 1pp a year, you need 1 ÷ 0.05 = 20pp of ESOV, so SOV = ${som.toFixed(1)}% + 20pp = <b>${g.sov.toFixed(1)}%</b>${g.reachable ? '' : ' (above the 80% ceiling, so not reachable)'}.</p>
+        <p><b>Sanity check.</b> 10pp of ESOV × 0.05 = 0.5pp per year, the published finding.</p>
+      `;
+    }
+
+    // ---- controls and readouts ----
     function update() {
       const som = Number($('som').value);
       const sov = Number($('sov').value);
@@ -292,7 +412,7 @@
 
       $('esov').textContent = sign(e) + 'pp';
       $('esov').className = 'stat-value ' + (zone === 'grow' ? 'grow' : zone === 'shrink' ? 'shrink' : 'accent');
-      $('change').textContent = sign(change) + 'pp / yr';
+      $('change').textContent = sign2(change) + 'pp / yr';
       $('change').className = 'stat-value ' + (zone === 'grow' ? 'grow' : zone === 'shrink' ? 'shrink' : '');
       $('hold').textContent = sovToHold(som).toFixed(1) + '%';
 
@@ -302,17 +422,31 @@
         ? `ESOV of 20pp, so SOV = ${som.toFixed(1)}% + 20pp.`
         : `Needs ${g.sov.toFixed(1)}% SOV, above the 80% ceiling.`;
 
-      const zoneText = {
-        grow: `above the maintain band, so share is growing`,
-        maintain: `within ±${MAINTAIN_BAND}pp of zero, so share should hold roughly steady`,
-        shrink: `below the maintain band, so share is likely to fall`,
-      }[zone];
       $('plain').innerHTML =
         `Your share of voice is <b>${sov.toFixed(1)}%</b> and your market share is <b>${som.toFixed(1)}%</b>, ` +
         `so your excess share of voice is <b>${sign(e)}pp</b>. ` +
-        `At the average rate, that predicts a share change of <b>${sign(change)}pp per year</b>. ` +
-        `You are ${zoneText}.`;
+        `At the average rate, that predicts a share change of <b>${sign2(change)}pp per year</b>. ` +
+        `You are ${zoneText[zone]}.`;
+
+      $('worked').innerHTML = renderWorked(som, sov);
     }
+
+    // Hover: read the prediction at whatever ESOV the pointer is over.
+    const defaultHover = 'Hover over the chart to read the prediction at any ESOV.';
+    $('chart').addEventListener('pointermove', (ev) => {
+      const rect = $('chart').getBoundingClientRect();
+      const vx = ((ev.clientX - rect.left) / rect.width) * W;
+      if (vx < M.left || vx > M.left + PW) {
+        $('hover').textContent = defaultHover;
+        return;
+      }
+      const x = xToEsov(vx);
+      $('hover').innerHTML =
+        `At ESOV <b>${sign(x)}pp</b>, the predicted change is <b>${sign(predictedChange(x))}pp per year</b> (${zoneText[zoneOf(x)]}).`;
+    });
+    $('chart').addEventListener('pointerleave', () => {
+      $('hover').textContent = defaultHover;
+    });
 
     ['som', 'sov'].forEach((id) => {
       $(id).addEventListener('input', update);
