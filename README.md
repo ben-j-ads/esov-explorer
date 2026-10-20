@@ -11,3 +11,5 @@ Open `index.html` in any browser. No build step and no dependencies.
 - **Readouts:** ESOV, predicted change per year, SOV needed to hold share, and SOV needed to grow 1pp a year.
 
 The 0.5pp figure is a cross-category average. Smaller brands and new launches typically need higher ESOV. The ±2pp maintain band is a display choice, not a finding.
+
+Styled to the ben.j.ads brand: paper ground, Bricolage Grotesque Condensed and Archivo (bundled in `fonts/`, SIL OFL), lime as a mark only. Still no build step and no external requests.
